@@ -142,7 +142,7 @@ WEBDOCK.component().register(function(exports){
             });
             //getProfilebyID(routeData.id)
         }
-        var query=[{storename:"products",search:"showonstore:Y"}];
+        var query=[{storename:"products",search:"invType:Inventry"}];
         //productHandler = exports.getComponent("product");
         sossdata.services.q(query)
                     .then(function(r){
@@ -229,13 +229,13 @@ WEBDOCK.component().register(function(exports){
         $('#send').prop('disabled', true);
         //console.log(JSON.stringify(bindData.InvoiceToSave));
         //return;
-        profileHandler.services.InvoiceSave(bindData.InvoiceToSave)
+        profileHandler.services.POSave(bindData.InvoiceToSave)
         .then(function(response){
             //console.log(JSON.stringify(response));
             
             if(response.success){
                 //console
-                $.notify("invoice Has been generated", "success");
+                $.notify("PO Has been generated", "success");
                 bindData.InvoiceToSave=response.result;
                 
             }else{

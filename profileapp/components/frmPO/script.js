@@ -47,6 +47,7 @@ WEBDOCK.component().register(function(exports){
         data:bindData,
         methods: {
             save:saveInvoice,
+            saveGRN:saveGRN,
             savePreview:savePreview,
             savePreviewCancel:function(){bindData.invoiceSave=false;},
             onFileChange: function(e) {
@@ -122,14 +123,14 @@ WEBDOCK.component().register(function(exports){
         sossdata = exports.getShellComponent("soss-data");
         uploaderInstance = exports.getComponent ("soss-uploader");
         if(routeData.tid!=null){
-            var query=[{storename:"orderheader",search:"invoiceNo:"+routeData.tid},{storename:"orderdetails",search:"invoiceNo:"+routeData.tid}];
+            var query=[{storename:"POheader",search:"tranNo:"+routeData.tid},{storename:"POdetails",search:"tranNo:"+routeData.tid}];
                     profileHandler.services.q(query)
                     .then(function(r){
                         console.log(JSON.stringify(r));
                         if(r.success){
-                            if(r.result.orderheader.length!=0){
-                                bindData.InvoiceToSave=r.result.orderheader[0];
-                                bindData.InvoiceToSave.InvoiceItems=r.result.orderdetails;
+                            if(r.result.POheader.length!=0){
+                                bindData.InvoiceToSave=r.result.POheader[0];
+                                bindData.InvoiceToSave.InvoiceItems=r.result.POdetails;
                                 bindData.invoiceSave=true;
                             }
                             return;
@@ -142,7 +143,7 @@ WEBDOCK.component().register(function(exports){
             });
             //getProfilebyID(routeData.id)
         }
-        var query=[{storename:"products",search:"showonstore:Y"}];
+        var query=[{storename:"products",search:"invType:Inventry"}];
         //productHandler = exports.getComponent("product");
         sossdata.services.q(query)
                     .then(function(r){
@@ -184,8 +185,8 @@ WEBDOCK.component().register(function(exports){
         //var d = ;
 
         bindData.InvoiceToSave={
-            invoiceNo:0,
-            invoiceDate:fDate(bindData.date),
+            tranNo:0,
+            tranDate:fDate(bindData.date),
             invoiceDueDate:fDate(bindData.duedate),
             profileId:bindData.i_profile.id,
             email:bindData.i_profile.email,
@@ -208,7 +209,7 @@ WEBDOCK.component().register(function(exports){
                 console.log(JSON.stringify(element));
                 bindData.InvoiceToSave.InvoiceItems.push(
                     {
-                        invoiceNo:0,
+                        tranNo:0,
                         itemid:element.itemid,
                         name:element.name,
                         uom:element.uom,qty:element.qty,
@@ -229,14 +230,46 @@ WEBDOCK.component().register(function(exports){
         $('#send').prop('disabled', true);
         //console.log(JSON.stringify(bindData.InvoiceToSave));
         //return;
-        profileHandler.services.InvoiceSave(bindData.InvoiceToSave)
+        profileHandler.services.POSave(bindData.InvoiceToSave)
         .then(function(response){
             //console.log(JSON.stringify(response));
             
             if(response.success){
                 //console
-                $.notify("invoice Has been generated", "success");
+                $.notify("PO Has been generated", "success");
                 bindData.InvoiceToSave=response.result;
+                
+            }else{
+                $.notify("Error! Savining Error", "error");
+                console.log(JSON.stringify(response.result));
+                $('#send').prop('disabled', false);
+                //alert (response.result.error);
+            }
+        })
+        .error(function(error){
+            $.notify("Error! Savining Error please check your intenet connection", "error");
+            console.log(JSON.stringify(error));
+            $('#send').prop('disabled', false);
+        });
+    }
+
+
+    function saveGRN(){
+        $('#send').prop('disabled', true);
+        //console.log(JSON.stringify(bindData.InvoiceToSave));
+        //return;
+        var GRN = bindData.InvoiceToSave;
+        GRN.poid=bindData.InvoiceToSave.tranNo;
+        //GRN.tranNo=null;
+        profileHandler.services.GRNSave(GRN)
+        .then(function(response){
+            //console.log(JSON.stringify(response));
+            
+            if(response.success){
+                //console
+                $.notify("GRN Has been generated", "success");
+                bindData.InvoiceToSave.Complete='Y';
+                //  bindData.InvoiceToSave=response.result;
                 
             }else{
                 $.notify("Error! Savining Error", "error");

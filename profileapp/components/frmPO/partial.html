@@ -37,7 +37,7 @@
             <table class="table table-bordered table-hover" id="tab_logic_total">
               <tbody>
               <tr>
-                <th>Invoice Number</th>
+                <th>PO Number</th>
                 <td>N/A</td>
               </tr>
               <tr>
@@ -121,17 +121,18 @@
 <div  class="container" v-show="invoiceSave">
     <div class="row clearfix">
         <div class="col-md-12">
-          <button id="send" class="btn btn-default pull-left" v-on:click="save" :disabled="InvoiceToSave.invoiceNo != 0 ? true : false">Confirm To Save</button>
-          <button  class="pull-right btn btn-default" v-on:click="savePreviewCancel" :disabled="InvoiceToSave.invoiceNo != 0 ? true : false">Cancel</button>
-          <button  class="pull-right btn btn-default" v-on:click="navigateBack" v-show="InvoiceToSave.invoiceNo != 0 ? true : false">Back</button>
-          <button  class="pull-right btn btn-default" v-on:click="print" v-show="InvoiceToSave.invoiceNo != 0 ? true : false">Print</button>
+          <button id="send" class="btn btn-default pull-left" v-on:click="save" :disabled="InvoiceToSave.tranNo != 0 ? true : false">Confirm To Save</button>
+          <button id="send" class="btn btn-default pull-left" v-on:click="saveGRN" :disabled="InvoiceToSave.Complete == 'Y' ? true : false">Generate GRN</button>
+          <button  class="pull-right btn btn-default" v-on:click="savePreviewCancel" :disabled="InvoiceToSave.tranNo != 0 ? true : false">Cancel</button>
+          <button  class="pull-right btn btn-default" v-on:click="navigateBack" v-show="InvoiceToSave.tranNo != 0 ? true : false">Back</button>
+          <button  class="pull-right btn btn-default" v-on:click="print" v-show="InvoiceToSave.tranNo != 0 ? true : false">Print</button>
         </div>
       </div>
     <div id="printcontent" >
     <div class="row">
         <div class="col-xs-12">
     		<div class="invoice-title">
-    			<h2>Invoice</h2><h3 class="pull-right">Invoice # {{ InvoiceToSave.invoiceNo }}</h3>
+    			<h2>Purchase Order</h2><h3 class="pull-right">PO # {{ InvoiceToSave.tranNo }}</h3>
     		</div>
     		<hr>
     		<div class="row">
@@ -148,7 +149,7 @@
     			<div class="col-xs-6 text-right">
             
     				<address>
-        			<strong>Invoiced By:</strong><br>
+        			<strong>PO By:</strong><br>
     					Lanka Bible College<br>
     					Christopher Road,<br>
     					Peradeneya<br>
@@ -162,14 +163,14 @@
     					<strong>Conatct Details:</strong><br>
     					{{ InvoiceToSave.contactno }}<br>
               {{ InvoiceToSave.email }}<br>
-              <img :src="'https://chart.googleapis.com/chart?cht=qr&chs=100x100&chl=pfl'+InvoiceToSave.profileId+'&choe=UTF-8'" v-show="InvoiceToSave.invoiceNo != 0 ? true : false"/>
+              <img :src="'https://chart.googleapis.com/chart?cht=qr&chs=100x100&chl=pfl'+InvoiceToSave.profileId+'&choe=UTF-8'" v-show="InvoiceToSave.tranNo != 0 ? true : false"/>
     				</address>
     			</div>
     			<div class="col-xs-6 text-right">
     				<address>
     					<strong>Order Date:</strong><br>
-              {{ InvoiceToSave.invoiceDate }}<br>
-              <img :src="'https://chart.googleapis.com/chart?cht=qr&chs=100x100&chl=inv'+InvoiceToSave.invoiceNo+'&choe=UTF-8'" v-show="InvoiceToSave.invoiceNo != 0 ? true : false"/>
+              {{ InvoiceToSave.tranDate }}<br>
+              <img :src="'https://chart.googleapis.com/chart?cht=qr&chs=100x100&chl=inv'+InvoiceToSave.tranNo+'&choe=UTF-8'" v-show="InvoiceToSave.tranNo != 0 ? true : false"/>
               <br>
     				</address>
     			</div>

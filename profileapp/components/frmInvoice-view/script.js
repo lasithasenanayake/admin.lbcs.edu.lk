@@ -50,6 +50,7 @@ WEBDOCK.component().register(function(exports){
         pInstance = exports.getShellComponent("soss-routes");
         routeData = pInstance.getInputData();
         profileHandler = exports.getComponent("profile");
+        //profileHandler = exports.getShellComponent("soss-data");
         uploaderInstance = exports.getComponent ("soss-uploader");
         if(routeData.tid!=null){
             var query=[{storename:"orderheader",search:"invoiceNo:"+routeData.tid},{storename:"orderdetails",search:"invoiceNo:"+routeData.tid}];
@@ -60,6 +61,29 @@ WEBDOCK.component().register(function(exports){
                             if(r.result.orderheader.length!=0){
                                 bindData.InvoiceToSave=r.result.orderheader[0];
                                 bindData.InvoiceToSave.InvoiceItems=r.result.orderdetails;
+                                bindData.invoiceSave=true;
+                            }
+                            return;
+                            //calcTotals();
+                            
+                        }
+                    })
+                    .error(function(error){
+                        console.log(error.responseJSON);
+            });
+            //getProfilebyID(routeData.id)
+        }
+
+        if(routeData.xid!=null){
+            var menuhandler  = exports.getShellComponent("soss-data");
+            var query={query:[{storename:"orderheader_pending",search:"invoiceNo:"+routeData.xid},{storename:"orderdetails_pending",search:"invoiceNo:"+routeData.xid}]};
+                 menuhandler.services.qcrossdomain(query)
+                    .then(function(r){
+                        console.log(JSON.stringify(r));
+                        if(r.success){
+                            if(r.result.orderheader_pending.length!=0){
+                                bindData.InvoiceToSave=r.result.orderheader_pending[0];
+                                bindData.InvoiceToSave.InvoiceItems=r.result.orderdetails_pending;
                                 bindData.invoiceSave=true;
                             }
                             return;

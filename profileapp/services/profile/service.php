@@ -4,53 +4,105 @@ require_once(PLUGIN_PATH . "/phpcache/cache.php");
 require_once(PLUGIN_PATH . "/auth/auth.php");
 class ProfileService{
     //public var $appname="profileapp";
+    private function updateLedger($ledgertran){
+        $Transaction=$ledgertran;
+        $result=SOSSData::Insert ("ledger", $ledgertran,$tenantId = null);
+        $result = SOSSData::Query ("profilestatus", urlencode("profileid:".$Transaction->profileid.""));
+        CacheData::clearObjects("profilestatus");
+        CacheData::clearObjects("ledger");
+        
+        if(count($result->result)!=0){
+            $status= $result->result[0];
+            $status->outstanding+=$Transaction->amount;
+            switch(strtolower($ledgertran->trantype)){
+                case "invoice":
+                    $status->totalInvoicedAmount+=$Transaction->amount;
+                    break;
+                case "receipt":
+                    $status->totalPaidAmount+=$Transaction->amount;
+                    break;
+                case "grn":
+                    $status->totalGRNAmount+=$Transaction->amount;
+                    break;
+                case "payment":
+                    $status->totalPaymentAmount+=$Transaction->amount;
+                    break;
+            }
+            $result=SOSSData::Update ("profilestatus", $status,$tenantId = null);
+        }else{
+            $status=new stdClass();
+            $status->profileid=$Transaction->profileid;
+            $status->outstanding=$Transaction->amount;
+            $status->totalInvoicedAmount=0;
+            $status->totalPaidAmount=0;
+            $status->totalGRNAmount=0;
+            $status->totalPaymentAmount=0;
+            switch(strtolower($ledgertran->trantype)){
+                case "invoice":
+                    $status->totalInvoicedAmount+=$Transaction->amount;
+                    break;
+                case "receipt":
+                    $status->totalPaidAmount+=$Transaction->amount;
+                    break;
+                case "grn":
+                    $status->totalGRNAmount+=$Transaction->amount;
+                    break;
+                case "payment":
+                    $status->totalPaymentAmount+=$Transaction->amount;
+                    break;
+            }
+            $result=SOSSData::Insert ("profilestatus", $status,$tenantId = null);
+                    
+        }
+    }
+
     public function postInvoiceSave($req,$res){
         
-        $invoice=$req->Body(true);
+        $Transaction=$req->Body(true);
         $user= Auth::Autendicate("profile","postInvoiceSave",$res);
-        if(!isset($invoice->email)){
+        if(!isset($Transaction->email)){
             $res->SetError ("provide email");
             
         }
-        if(!isset($invoice->contactno)){
+        if(!isset($Transaction->contactno)){
             $res->SetError ("provide contact no");
         }
         
-        $result = SOSSData::Query ("profile", urlencode("id:".$invoice->profileId.""));
-        
+        $result = SOSSData::Query ("profile", urlencode("id:".$Transaction->profileId.""));
+        $Transaction->status="new";
         //return $result;
         if(count($result->result)!=0)
         {
-            $invoice->preparedByID=$user->userid;
-            $invoice->preparedBy=$user->email;
-            $invoice->PaymentComplete="N";
-            $invoice->balance=$invoice->total;
-            $result = SOSSData::Insert ("orderheader", $invoice,$tenantId = null);
+            $Transaction->preparedByID=$user->userid;
+            $Transaction->preparedBy=$user->email;
+            $Transaction->PaymentComplete="N";
+            $Transaction->balance=$Transaction->total;
+            $result = SOSSData::Insert ("orderheader", $Transaction,$tenantId = null);
             CacheData::clearObjects("orderheader");
             if($result->success){
-                $invoice->invoiceNo = $result->result->generatedId;
+                $Transaction->invoiceNo = $result->result->generatedId;
                 $ledgertran =new StdClass;
-                $ledgertran->profileid=$invoice->profileId;
-                $ledgertran->tranid=$invoice->invoiceNo;
+                $ledgertran->profileid=$Transaction->profileId;
+                $ledgertran->tranid=$Transaction->invoiceNo;
                 $ledgertran->trantype='invoice';
-                $ledgertran->tranDate=$invoice->invoiceDate;
+                $ledgertran->tranDate=$Transaction->invoiceDate;
                 $ledgertran->description='Invoice No Has been generated';
-                $ledgertran->amount=$invoice->total;
-                $result=SOSSData::Insert ("ledger", $ledgertran,$tenantId = null);
-                CacheData::clearObjects("ledger");
-                //return $invoice;
+                $ledgertran->amount=$Transaction->total;
+                $this->updateLedger($ledgertran);   
+                
+                //return $Transaction;
                 if($result->success){
                 
                     $profileservices=array();
-                    foreach($invoice->InvoiceItems as $key=>$value){
-                        $invoice->InvoiceItems[$key]->invoiceNo=$invoice->invoiceNo;
+                    foreach($Transaction->InvoiceItems as $key=>$value){
+                        $Transaction->InvoiceItems[$key]->invoiceNo=$Transaction->invoiceNo;
                         if(strtolower($value->invType)=="service"){
                             $serviceitems =new StdClass;
-                            $serviceitems->invid=$invoice->invoiceNo;
-                            $serviceitems->profileId=$invoice->profileId;
+                            $serviceitems->invid=$Transaction->invoiceNo;
+                            $serviceitems->profileId=$Transaction->profileId;
                             $serviceitems->itemid=$value->itemid;
                             $serviceitems->name=$value->name;
-                            $serviceitems->purchaseddate=$invoice->invoiceDate;
+                            $serviceitems->purchaseddate=$Transaction->invoiceDate;
                             $serviceitems->price=$value->total;
                             $serviceitems->catogory=$value->catogory;
                             $serviceitems->uom=$value->uom;
@@ -59,10 +111,11 @@ class ProfileService{
                             
                             array_push($profileservices,$serviceitems);
                         }
-                        //var_dump($invoice->InvoiceItems[$key]->invoiceNo);
+                        //var_dump($Transaction->InvoiceItems[$key]->invoiceNo);
+                        $this->updateInventry($value,-1);
                     }
                     //return $profileservices;
-                    $result = SOSSData::Insert ("orderdetails", $invoice->InvoiceItems,$tenantId = null);
+                    $result = SOSSData::Insert ("orderdetails", $Transaction->InvoiceItems,$tenantId = null);
                     if(count($profileservices)!=0){
                         $result = SOSSData::Insert ("profileservices", $profileservices,$tenantId = null);
                         CacheData::clearObjects("profileservices");
@@ -75,26 +128,9 @@ class ProfileService{
                     return $result;
                 }
                 //unset($value); 
-                $result = SOSSData::Query ("profilestatus", urlencode("profileid:".$invoice->profileId.""));
-                CacheData::clearObjects("profilestatus");
-                //$status=null;
-                if(count($result->result)!=0){
-                    $status= $result->result[0];
-                    $status->outstanding+=$invoice->total;
-                    $status->totalInvoicedAmount+=$invoice->total;
-                    $status->totalPaidAmout+=0;
-                    $result=SOSSData::Update ("profilestatus", $status,$tenantId = null);
-                }else{
-                    $status=new stdClass();
-                    $status->profileid=$invoice->profileId;
-                    $status->outstanding=$invoice->total;
-                    $status->totalInvoicedAmount=$invoice->total;
-                    $status->totalPaidAmout=0;
-                    $result=SOSSData::Insert ("profilestatus", $status,$tenantId = null);
-                    
-                }
                 
-                return $invoice;
+                
+                return $Transaction;
             }else{
                 return $result;
             }
@@ -102,6 +138,153 @@ class ProfileService{
            //var_dump($result->response[0]->id);
            //exit();
            $res->SetError ("Invalied Profile");
+           exit();
+        }
+        
+        
+    }
+
+    private function updateInventry($value,$s){
+        if(strtolower($value->invType)=="inventry"){
+            $resultitems = SOSSData::Query ("product_inventrymaster", urlencode("itemid:".$value->itemid.""));//SOSSData::Insert ("", $Transaction,$tenantId = null);
+            if(count($resultitems->result)!=0){
+                $itemInv=$resultitems->result[0];
+                if($s<0){
+                    $itemInv->qty=$itemInv->qty-$value->qty;
+                }else{
+                    $itemInv->qty=$itemInv->qty+$value->qty;
+                }
+                SOSSData::Update ("product_inventrymaster", $itemInv,$tenantId = null);
+            }else{
+                $itemInv =new StdClass;
+                $itemInv->itemid=$value->itemid;
+                $itemInv->uom=$value->uom;
+                if($s<0){
+                    $itemInv->qty=-1*$value->qty;
+                }else{
+                    $itemInv->qty=$value->qty;
+                }
+                SOSSData::Insert ("product_inventrymaster", $itemInv,$tenantId = null);
+            }
+        }
+    }
+
+    public function postPOSave($req,$res){
+        
+        $Transaction=$req->Body(true);
+        $user= Auth::Autendicate("profile","postPOSave",$res);
+        if(!isset($Transaction->email)){
+            $res->SetError ("provide email");
+            
+        }
+        if(!isset($Transaction->contactno)){
+            $res->SetError ("provide contact no");
+        }
+        
+        $result = SOSSData::Query ("profile", urlencode("id:".$Transaction->profileId.""));
+        
+        //return $result;
+        if(count($result->result)!=0)
+        {
+            $Transaction->preparedByID=$user->userid;
+            $Transaction->preparedBy=$user->email;
+            $Transaction->Complete="N";
+            $Transaction->balance=$Transaction->total;
+            $result = SOSSData::Insert ("poheader", $Transaction,$tenantId = null);
+            CacheData::clearObjects("poheader");
+            if($result->success){
+                $Transaction->tranNo = $result->result->generatedId;
+                if($result->success){
+                    
+                    $profileservices=array();
+                    foreach($Transaction->InvoiceItems as $key=>$value){
+                        $Transaction->InvoiceItems[$key]->tranNo=$Transaction->tranNo;
+                        //var_dump($Transaction->InvoiceItems[$key]->tranNo);
+                    }
+                    $result = SOSSData::Insert ("podetails", $Transaction->InvoiceItems,$tenantId = null);
+                    
+                    CacheData::clearObjects("podetails");
+                }else{
+                    $res->SetError ("Erorr");
+                    return $result;
+                }
+                
+                return $Transaction;
+            }else{
+                return $result;
+            }
+        }else{
+           //var_dump($result->response[0]->id);
+           //exit();
+           $res->SetError ("Invalied Profile");
+           exit();
+        }
+        
+        
+    }
+
+    public function postGRNSave($req,$res){
+        
+        $Transaction=$req->Body(true);
+        $user= Auth::Autendicate("profile","postGRNSave",$res);
+        
+        if(!isset($Transaction->poid)){
+            $res->SetError ("PO is not corrrect");
+            return;
+        }
+        $result = SOSSData::Query ("poheader", urlencode("tranNo:".$Transaction->poid.""));
+        
+        //return $result;
+        if(count($result->result)!=0)
+        {
+            $PO =$result->result[0];
+            if($PO->Complete=='Y'){
+                $res->SetError ("GRN Already Generated for this PO");
+                return;
+            }
+            $Transaction->preparedByID=$user->userid;
+            $Transaction->preparedBy=$user->email;
+            $Transaction->Complete="N";
+            $Transaction->balance=$Transaction->total;
+            
+            $result = SOSSData::Insert ("grnheader", $Transaction,$tenantId = null);
+            CacheData::clearObjects("grnheader");
+            if($result->success){
+                $Transaction->tranNo = $result->result->generatedId;
+                $ledgertran =new StdClass;
+                $ledgertran->profileid=$Transaction->profileId;
+                $ledgertran->tranid=$Transaction->tranNo;
+                $ledgertran->trantype='GRN';
+                $ledgertran->tranDate=$Transaction->tranDate;
+                $ledgertran->description='Invoice No Has been generated';
+                $ledgertran->amount=-1*$Transaction->total;
+                //$result=SOSSData::Insert ("ledger", $ledgertran,$tenantId = null);
+                $this->updateLedger($ledgertran);
+                if($result->success){
+                    
+                    $profileservices=array();
+                    foreach($Transaction->InvoiceItems as $key=>$value){
+                        $Transaction->InvoiceItems[$key]->tranNo=$Transaction->tranNo;
+                        $this->updateInventry($value,1);
+                        //var_dump($Transaction->InvoiceItems[$key]->tranNo);
+                    }
+                    $result = SOSSData::Insert ("grndetails", $Transaction->InvoiceItems,$tenantId = null);
+                    $PO->Complete='Y';
+                    $result=SOSSData::Update ("poheader", $PO,$tenantId = null);
+                    CacheData::clearObjects("grndetails");
+                }else{
+                    $res->SetError ("Erorr");
+                    return $result;
+                }
+                
+                return $Transaction;
+            }else{
+                return $result;
+            }
+        }else{
+           //var_dump($result->response[0]->id);
+           //exit();
+           $res->SetError ("Invalied PO");
            exit();
         }
         
@@ -138,8 +321,9 @@ class ProfileService{
                 $ledgertran->tranDate=$payment->receiptDate;
                 $ledgertran->description='Invoice No Has been generated';
                 $ledgertran->amount=-1*$payment->paymentAmount;
-                $result=SOSSData::Insert ("ledger", $ledgertran,$tenantId = null);
+                //$result=SOSSData::Insert ("ledger", $ledgertran,$tenantId = null);
                 //return $payment;
+                $this->updateLedger($ledgertran);
                 CacheData::clearObjects("ledger");
                 if($result->success){
                     $balance=$payment->paymentAmount;
@@ -177,25 +361,7 @@ class ProfileService{
                     return $result;
                 }
                 unset($value); 
-                $result = SOSSData::Query ("profilestatus", urlencode("profileid:".$payment->profileId.""));
-                CacheData::clearObjects("profilestatus");
-                //$status=null;
-                if(count($result->result)!=0){
-                    $status= $result->result[0];
-                    $status->outstanding-=$payment->paymentAmount;
-                    $status->totalInvoicedAmount+=0;
-                    $status->totalPaidAmout+=$payment->paymentAmount;
-                    $result=SOSSData::Update ("profilestatus", $status,$tenantId = null);
-                }else{
-                    $status=new stdClass();
-                    $status->profileid=$payment->profileId;
-                    $status->outstanding=-1*$payment->paymentAmount;
-                    $status->totalInvoicedAmount=$payment->paymentAmount;
-                    $status->totalPaidAmout=$payment->paymentAmout;
-                    $result=SOSSData::Insert ("profilestatus", $status,$tenantId = null);
-                    
-                }
-                
+                                
                 return $payment;
             }else{
                 return $result;
@@ -213,11 +379,7 @@ class ProfileService{
     public function postSave($req,$res){
         $profile=$req->Body(true);
         $user= Auth::Autendicate("profile","postSave",$res);
-        if(!isset($profile->email)){
-            //http_response_code(500);
-            $res->SetError ("provide email");
-            
-        }
+        
         if(!isset($profile->contactno)){
             //http_response_code(500);
             $res->SetError ("provide contact no");
@@ -225,7 +387,7 @@ class ProfileService{
         }
         //var_dump($profile);
         //exit();
-        $result = SOSSData::Query ("profile", urlencode("id_number:".$profile->id_number.""));
+        $result = SOSSData::Query ("profile", urlencode("id_number:".$profile->email.""));
         
         //return $result;
         if(count($result->result)==0)

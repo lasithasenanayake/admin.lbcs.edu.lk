@@ -21,6 +21,10 @@
             },
             "InvoiceSave" : {
                 "method" : "POST"
+            },"POSave" : {
+                "method" : "POST"
+            },"GRNSave" : {
+                "method" : "POST"
             },
             "PaymentSave" : {
                 "method" : "POST"
