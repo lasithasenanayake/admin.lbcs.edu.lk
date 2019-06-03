@@ -44,6 +44,20 @@
             }
         },
         {
+            "fieldName":"icon",
+            "dataType":"java.lang.String",
+            "annotations":{
+                "maxLen": 500
+            }
+        },
+        {
+            "fieldName":"other",
+            "dataType":"java.lang.String",
+            "annotations":{
+                "maxLen": 500
+            }
+        },
+        {
             "fieldName":"createdate",
             "dataType":"java.util.Date"
         },

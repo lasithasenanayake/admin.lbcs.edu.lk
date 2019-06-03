@@ -18,7 +18,13 @@
         "methods" : {
             "allProducts" : {
                 "method" : "GET",
-                "parameters": ["lat","lng","catid"]
+                "parameters": ["page","size","q"]
+            },
+            "Save" : {
+                "method" : "POST"
+            },
+            "ProductToStore" : {
+                "method" : "POST"
             }
         }
     },
@@ -120,6 +126,12 @@
             "destMethod": "DELETE",
             "destUrl" : "http://localhost:9000/data/storeproductmapping",
             "bodyTemplate" : "{\"object\":@@body@@}"
+        },
+        "getImagesById": {
+            "method": "GET",
+            "route": "/Imgsbyid/@catid",
+            "destMethod": "GET",
+            "destUrl" : "http://localhost:9000/data/products_image?query=articalid:@catid"
         }
         
     }
