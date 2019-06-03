@@ -9,6 +9,17 @@
             }
         },
         {
+            "fieldName":"tid",
+            "dataType":"int"
+        },
+        {
+            "fieldName":"tenant",
+            "dataType":"java.lang.String",
+            "annotations":{
+                "maxLen": 200
+            }
+        },
+        {
             "fieldName":"name",
             "dataType":"java.lang.String",
             "annotations":{
@@ -116,6 +127,13 @@
         },
         {
             "fieldName":"userid",
+            "dataType":"java.lang.String",
+            "annotations":{
+                "maxLen": 100
+            }
+        },
+        {
+            "fieldName":"linkeduserid",
             "dataType":"java.lang.String",
             "annotations":{
                 "maxLen": 100

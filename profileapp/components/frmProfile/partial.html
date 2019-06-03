@@ -195,7 +195,7 @@
                                 <i class="fa fa-sticky-note-o"></i>
                                     
                                   </div>
-                              <input type="text" placeholder="ID Number." class="form-control input-md" v-model="i_profile.id_number">
+                                    <input type="text" placeholder="ID Number." class="form-control input-md" v-model="i_profile.id_number" v-on:focusout="searchItems('id_number',i_profile.id_number);">
                                 
                                   </div>
                             
@@ -253,7 +253,7 @@
                 <div class="panel-body">
                   <div class="row row-pad-5">
                     <div class="col-lg-6">
-                      <input type="email" name="email" placeholder="email" class="form-control" v-model="i_profile.email" v-on:focusout="searchItems('email',i_profile.email);"/>
+                      <input type="email" name="email" placeholder="email" class="form-control" v-model="i_profile.email" />
                     </div>
                     <div class="col-lg-6">
                       <input type="text" name="contactno" placeholder="Conatct no" class="form-control" v-model="i_profile.contactno" v-on:focusout="searchItems('contactno',i_profile.contactno);"/>

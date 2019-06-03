@@ -146,7 +146,8 @@ WEBDOCK.component().register(function(exports){
             productHandler.services.allProducts()
             .then(function(response){
                 //console.log(response.result);
-                bindData.products=response.result;
+                bindData.products=response.result.result;
+                console.log(bindData.products);
             })
             .error(function(error){
                 
