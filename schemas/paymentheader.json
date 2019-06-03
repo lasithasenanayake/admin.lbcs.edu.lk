@@ -9,6 +9,17 @@
             }
         },
         {
+            "fieldName":"tid",
+            "dataType":"int"
+        },
+        {
+            "fieldName":"tenant",
+            "dataType":"java.lang.String",
+            "annotations":{
+                "maxLen": 200
+            }
+        },
+        {
             "fieldName":"paymentType",
             "dataType":"java.lang.String",
             "annotations":{

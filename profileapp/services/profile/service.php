@@ -225,7 +225,7 @@ class ProfileService{
         }
         //var_dump($profile);
         //exit();
-        $result = SOSSData::Query ("profile", urlencode("email:".$profile->email.""));
+        $result = SOSSData::Query ("profile", urlencode("id_number:".$profile->id_number.""));
         
         //return $result;
         if(count($result->result)==0)

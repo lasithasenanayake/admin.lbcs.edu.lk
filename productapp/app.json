@@ -11,12 +11,19 @@
         "frmproduct": {
             "type":"component",
             "location":"components"
+        },
+        "newproduct": {
+            "type":"component",
+            "location":"components"
+        },"newproduct_publish": {
+            "type":"component",
+            "location":"components"
         }
     },
     "description":{
         "title": "Products",
         "author":"Davvag",
-        "version":"0.1",
+        "version":"0.4",
         "icon":"appicon.png"
     },
     "tags":["showindock"],
@@ -26,8 +33,10 @@
             "onLoad": ["product"],
             "routes":{
                 "partials":{
-                    "/product" : "frmproduct"
+                    "/product" : "newproduct",
+                    "/publish":"newproduct_publish"
                 }
+                
             }
         }
     }
