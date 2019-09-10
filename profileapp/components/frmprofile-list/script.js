@@ -3,7 +3,7 @@ WEBDOCK.component().register(function(exports){
         submitErrors: undefined,
         SearchItem:"",
         SearchColumn:"name",
-        items:[],
+        items:undefined,
         image:'',
         Message:'Please start by searching the profile or creating a new profile'
     };
@@ -15,6 +15,10 @@ WEBDOCK.component().register(function(exports){
         data:bindData,
         methods: {
             searchItems:searchItems,
+            clear:function(){
+                localStorage.setItem("tmpprofiles",undefined);
+                bindData.items=undefined;
+            },
             navigate: function(pagev,p){
                 //console.log(p);
                

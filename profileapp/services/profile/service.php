@@ -379,7 +379,11 @@ class ProfileService{
     public function postSave($req,$res){
         $profile=$req->Body(true);
         $user= Auth::Autendicate("profile","postSave",$res);
-        
+        if(!isset($profile->email)){
+            //http_response_code(500);
+            $res->SetError ("provide email");
+            
+        }
         if(!isset($profile->contactno)){
             //http_response_code(500);
             $res->SetError ("provide contact no");
@@ -387,7 +391,7 @@ class ProfileService{
         }
         //var_dump($profile);
         //exit();
-        $result = SOSSData::Query ("profile", urlencode("id_number:".$profile->email.""));
+        $result = SOSSData::Query ("profile", urlencode("email:".$profile->email.""));
         
         //return $result;
         if(count($result->result)==0)

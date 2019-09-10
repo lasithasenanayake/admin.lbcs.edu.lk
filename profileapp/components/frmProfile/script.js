@@ -1,6 +1,6 @@
 WEBDOCK.component().register(function(exports){
     var bindData = {
-        i_profile:{catogory:"Student",id:0,country:"Sri Lanka",city:""},
+        i_profile:{catogory:"Customer",id:0,country:"Sri Lanka",city:""},
         submitErrors: undefined,
         SearchItem:"",
         items:[],
@@ -78,6 +78,7 @@ WEBDOCK.component().register(function(exports){
         validator.map ("i_profile.city",true, "You should enter a city");
         validator.map ("i_profile.email","email", "email address is not valied");
         validator.map ("i_profile.contactno",true, "contact no is incorrect");
+        validator.map ("i_profile.id_number",true, "ID no is incorrect");
         //validator.map ("i_profile.dateofbirth","date", "date of birth is incorrect");
         validator.map ("i_profile.catogory",true, "You should select a product category");
         //validator.map ("p_image",true, "You should upload an image");

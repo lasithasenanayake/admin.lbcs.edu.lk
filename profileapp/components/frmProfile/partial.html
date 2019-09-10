@@ -18,6 +18,10 @@
               <div class="row row-pad-12">
                     <div class="col-lg-4">
                         <select class="form-control mb15" v-model="i_profile.catogory">
+                            <option>Customer</option>
+                            <option>Vender</option>
+                            <option>Company</option>
+                            <option>Guest</option>
                             <option>Staff</option>
                             <option>Student</option>
                             <option>Visiting</option>
@@ -151,7 +155,7 @@
                           <label class="col-md-4 control-label" for="Marital">Marital Status:</label>
                           <div class="col-md-8"> 
                             <label class="radio-inline" for="Marital-0">
-                              <input type="radio"  value="singel" name="Marital" v-model="i_profile.maritalStatus">
+                              <input type="radio"  value="single" name="Marital" v-model="i_profile.maritalStatus">
                               Married
                             </label> 
                             <label class="radio-inline" for="Marital-1">
@@ -195,7 +199,7 @@
                                 <i class="fa fa-sticky-note-o"></i>
                                     
                                   </div>
-                                    <input type="text" placeholder="ID Number." class="form-control input-md" v-model="i_profile.id_number" v-on:focusout="searchItems('id_number',i_profile.id_number);">
+                              <input type="text" placeholder="ID Number." class="form-control input-md" v-model="i_profile.id_number" v-on:focusout="searchItems('id_number',i_profile.id_number);">
                                 
                                   </div>
                             
@@ -253,7 +257,7 @@
                 <div class="panel-body">
                   <div class="row row-pad-5">
                     <div class="col-lg-6">
-                      <input type="email" name="email" placeholder="email" class="form-control" v-model="i_profile.email" />
+                      <input type="email" name="email" placeholder="email" class="form-control" v-model="i_profile.email" v-on:focusout="searchItems('email',i_profile.email);"/>
                     </div>
                     <div class="col-lg-6">
                       <input type="text" name="contactno" placeholder="Conatct no" class="form-control" v-model="i_profile.contactno" v-on:focusout="searchItems('contactno',i_profile.contactno);"/>

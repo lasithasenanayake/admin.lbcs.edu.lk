@@ -33,6 +33,7 @@
     <div class="row">
         <h1><center>{{ Message }}</center></h1>
     </div>
+    
     <div class="row">
       
       <div class="col-md-6" v-for="profile in items">
@@ -56,7 +57,9 @@
           </div>
         </div>
       </div><!-- col-md-6 -->
-      
+      <div class="row center" v-if="items">
+        <button class="btn btn-default" v-on:click="clear">Clear History</button>
+      </div>
       
     </div><!-- row -->
   </div><!-- people-list -->

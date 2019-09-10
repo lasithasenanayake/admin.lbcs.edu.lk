@@ -12,6 +12,10 @@
             "type":"component",
             "location":"components"
         },
+        "frmPO": {
+            "type":"component",
+            "location":"components"
+        },
         "frmInvoice-view": {
             "type":"component",
             "location":"components"
@@ -37,7 +41,7 @@
     "description":{
         "title": "Profile",
         "author":"Davvag",
-        "version":"0.5",
+        "version":"0.7",
         "icon":""
     },
     "tags":["showindock"],
@@ -51,6 +55,7 @@
                     "/edit" : "frmProfile",
                     "/inv" : "frmInvoice",
                     "/rpt" : "frmRecipt",
+                    "/po" : "frmPO",
                     "/receipt" : "frmRecipt-view",
                     "/invoice":"frmInvoice-view"
                 }
